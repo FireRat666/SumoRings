@@ -4,7 +4,7 @@
     // --- Configuration ---
     const STATE_KEY = "sumopaint_game_state";
     const USER_DATA_KEY_PREFIX = "sumo_user:";
-    const TILE_SIZE = 1.2;
+    const RING_STEP = 1.2;
     const MAX_RINGS = 12;
     const DROP_INTERVAL_MS = 10000;
     const GAME_ARENA_Y = 15;
@@ -29,7 +29,7 @@
         lastWinner: null
     };
 
-    let ringTiles = []; // Array of arrays: ringTiles[ringIndex] = [tileObjects]
+    let rings = []; // Array of GameObject
     let uiDisplays = [];
     let isMuted = false;
     let audio = { drop: null };
@@ -128,33 +128,29 @@
 
     async function buildArena() {
         const arenaRoot = await new BS.GameObject({ name: "ArenaRoot", localPosition: new BS.Vector3(0, GAME_ARENA_Y, 0) }).Async();
-        ringTiles = [];
+        rings = [];
 
         for (let r = 0; r <= MAX_RINGS; r++) {
-            ringTiles[r] = [];
-            const radius = r * TILE_SIZE;
+            const inner = r * RING_STEP;
+            const outer = (r + 1) * RING_STEP;
             const color = ringColors[r % ringColors.length];
 
-            const count = r === 0 ? 1 : Math.ceil((2 * Math.PI * radius) / TILE_SIZE);
-            const angleStep = (2 * Math.PI) / count;
+            // Alternate Y slightly to fix Z-fighting
+            const yOffset = (r % 2) * 0.002;
 
-            for (let i = 0; i < count; i++) {
-                const angle = i * angleStep;
-                const x = Math.cos(angle) * radius;
-                const z = Math.sin(angle) * radius;
+            const ringObj = await new BS.GameObject({
+                name: `SumoRing_${r}`,
+                parent: arenaRoot,
+                localPosition: new BS.Vector3(0, yOffset, 0),
+                localEulerAngles: new BS.Vector3(90, 0, 0) // Face up
+            }).Async();
 
-                const tile = await new BS.GameObject({
-                    name: `SumoTile_R${r}_${i}`,
-                    parent: arenaRoot,
-                    localPosition: new BS.Vector3(x, 0, z)
-                }).Async();
+            // Using RingGeometry for perfect circular segments without gaps
+            await ringObj.AddComponent(new BS.BanterGeometry(BS.GeometryType.RingGeometry, 0, 1, 1, 1, 1, 1, 1, 1, 32, 0, 6.28, 8, false, 1, 1, inner, outer));
+            await ringObj.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: color, side: BS.MaterialSide.Double }));
+            await ringObj.AddComponent(new BS.MeshCollider());
 
-                await tile.AddComponent(new BS.BanterBox({ width: TILE_SIZE - 0.05, height: 0.5, depth: TILE_SIZE - 0.05 }));
-                await tile.AddComponent(new BS.BoxCollider({ size: new BS.Vector3(TILE_SIZE - 0.05, 0.5, TILE_SIZE - 0.05) }));
-                await tile.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: color }));
-
-                ringTiles[r].push(tile);
-            }
+            rings.push(ringObj);
         }
     }
 
@@ -194,7 +190,7 @@
 
         for (let r = 0; r <= MAX_RINGS; r++) {
             const active = r <= gameState.activeRingCount;
-            ringTiles[r].forEach(t => t.SetActive(active));
+            if (rings[r]) rings[r].SetActive(active);
         }
 
         if (gameState.activeRingCount < oldRingCount && !isMuted) {
@@ -208,7 +204,7 @@
 
         let displayStr = "";
         if (gameState.status === "LOBBY") displayStr = "SUMO PAINT\nWAITING FOR HOST";
-        else if (gameState.status === "ACTIVE") displayStr = `RING DROPS IN: ${timeRemaining}s\nRINGS LEFT: ${gameState.activeRingCount}`;
+        else if (gameState.status === "ACTIVE") displayStr = `RING DROPS IN: ${timeRemaining}s\nRINGS LEFT: ${gameState.activeRingCount + 1}`;
         else displayStr = "GAME OVER";
 
         uiDisplays.forEach(ui => ui.text = displayStr);
