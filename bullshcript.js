@@ -86,7 +86,7 @@
         const floor = await new BS.GameObject({ name: "LobbyFloor", parent: root, localPosition: new BS.Vector3(LOBBY_POS.x, LOBBY_POS.y - 0.05, LOBBY_POS.z) }).Async();
         await floor.AddComponent(new BS.BanterBox({ width: 30, height: 0.5, depth: 30 }));
         await floor.AddComponent(new BS.BoxCollider({ size: new BS.Vector3(30, 0.5, 30) }));
-        await floor.AddComponent(new BS.BanterMaterial({ color: new BS.Vector4(0.1, 0.1, 0.1, 1) }));
+        await floor.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: new BS.Vector4(0.1, 0.1, 0.1, 1) }));
 
         // Buttons
         const buttonGroup = await new BS.GameObject({ name: "Controls", parent: floor, localPosition: new BS.Vector3(0, 1.2, 5) }).Async();
@@ -95,7 +95,7 @@
             const btn = await new BS.GameObject({ name: name, parent: buttonGroup, localPosition: new BS.Vector3(x, 0, 0) }).Async();
             await btn.AddComponent(new BS.BanterBox({ width: 2.5, height: 0.8, depth: 0.5 }));
             await btn.AddComponent(new BS.BoxCollider({ size: new BS.Vector3(2.5, 0.8, 0.5) }));
-            await btn.AddComponent(new BS.BanterMaterial({ color: color }));
+            await btn.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: color }));
             btn.SetLayer(5);
             const t = await new BS.GameObject({ name: name + "Text", parent: btn, localPosition: new BS.Vector3(0, 0, -0.3) }).Async();
             await t.AddComponent(new BS.BanterText({ text: text, fontSize: 1, color: new BS.Vector4(1, 1, 1, 1), horizontalAlignment: BS.HorizontalAlignment.Center }));
@@ -151,7 +151,7 @@
 
                 await tile.AddComponent(new BS.BanterBox({ width: TILE_SIZE - 0.05, height: 0.5, depth: TILE_SIZE - 0.05 }));
                 await tile.AddComponent(new BS.BoxCollider({ size: new BS.Vector3(TILE_SIZE - 0.05, 0.5, TILE_SIZE - 0.05) }));
-                await tile.AddComponent(new BS.BanterMaterial({ color: color }));
+                await tile.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: color }));
 
                 ringTiles[r].push(tile);
             }
