@@ -10,14 +10,16 @@
     const GAME_ARENA_Y = 15;
     const LOBBY_POS = { x: 0, y: 0.1, z: -40 };
 
-    const RING_COLORS = [
-        new BS.Vector4(1, 0.1, 0.1, 1), // Red
-        new BS.Vector4(0.1, 1, 0.1, 1), // Green
-        new BS.Vector4(0.1, 0.5, 1, 1), // Blue
-        new BS.Vector4(1, 1, 0.1, 1),   // Yellow
-        new BS.Vector4(1, 0.1, 1, 1),   // Magenta
-        new BS.Vector4(0.1, 1, 1, 1)    // Cyan
+    // Use raw arrays here to avoid ReferenceError: BS is not defined
+    const RING_COLOR_DATA = [
+        [1, 0.1, 0.1, 1], // Red
+        [0.1, 1, 0.1, 1], // Green
+        [0.1, 0.5, 1, 1], // Blue
+        [1, 1, 0.1, 1],   // Yellow
+        [1, 0.1, 1, 1],   // Magenta
+        [0.1, 1, 1, 1]    // Cyan
     ];
+    let ringColors = [];
 
     // --- State Variables ---
     let gameState = {
@@ -43,11 +45,20 @@
         if (scene) return;
         scene = BS.BanterScene.GetInstance();
 
+        // Convert raw color data to BS.Vector4 now that BS is defined
+        ringColors = RING_COLOR_DATA.map(c => new BS.Vector4(c[0], c[1], c[2], c[3]));
+
+        console.log("Sumopaint: Calling setupSettings.");
         setupSettings();
 
         if (!scene.unityLoaded) {
-            await new Promise(resolve => scene.On("unity-loaded", resolve));
+            console.log("Sumopaint: Waiting for Unity...");
+            await new Promise(resolve => {
+                scene.On("unity-loaded", resolve);
+                window.addEventListener("unity-loaded", resolve, { once: true });
+            });
         }
+        console.log("Sumopaint: Unity Loaded!");
 
         await buildEnvironment();
         await buildArena();
@@ -122,9 +133,8 @@
         for (let r = 0; r <= MAX_RINGS; r++) {
             ringTiles[r] = [];
             const radius = r * TILE_SIZE;
-            const color = RING_COLORS[r % RING_COLORS.length];
+            const color = ringColors[r % ringColors.length];
 
-            // Calculate number of tiles to fill the circumference
             const count = r === 0 ? 1 : Math.ceil((2 * Math.PI * radius) / TILE_SIZE);
             const angleStep = (2 * Math.PI) / count;
 
@@ -182,7 +192,6 @@
         const oldRingCount = gameState.activeRingCount;
         gameState = JSON.parse(raw);
 
-        // Visual update for rings
         for (let r = 0; r <= MAX_RINGS; r++) {
             const active = r <= gameState.activeRingCount;
             ringTiles[r].forEach(t => t.SetActive(active));
