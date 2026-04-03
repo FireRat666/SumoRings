@@ -2,7 +2,7 @@
     let scene;
 
     // --- Configuration ---
-    const STATE_KEY = "sumopaint_game_state";
+    const STATE_KEY = "sumorings_game_state";
     const USER_DATA_KEY_PREFIX = "sumo_user:";
     const RING_STEP = 1.2;
     const MAX_RINGS = 12;
@@ -48,17 +48,17 @@
         // Convert raw color data to BS.Vector4 now that BS is defined
         ringColors = RING_COLOR_DATA.map(c => new BS.Vector4(c[0], c[1], c[2], c[3]));
 
-        console.log("Sumopaint: Calling setupSettings.");
+        console.log("SumoRings: Calling setupSettings.");
         setupSettings();
 
         if (!scene.unityLoaded) {
-            console.log("Sumopaint: Waiting for Unity...");
+            console.log("SumoRings: Waiting for Unity...");
             await new Promise(resolve => {
                 scene.On("unity-loaded", resolve);
                 window.addEventListener("unity-loaded", resolve, { once: true });
             });
         }
-        console.log("Sumopaint: Unity Loaded!");
+        console.log("SumoRings: Unity Loaded!");
 
         await buildEnvironment();
         await buildArena();
@@ -68,7 +68,7 @@
         setupNetworking();
 
         setInterval(update, 100);
-        console.log("Sumopaint: Init Complete");
+        console.log("SumoRings: Init Complete");
     }
 
     function setupSettings() {
@@ -179,7 +179,7 @@
 
         for (let d of dirs) {
             const obj = await new BS.GameObject({ parent: uiRoot, localPosition: new BS.Vector3(...d.pos), localEulerAngles: new BS.Vector3(...d.rot) }).Async();
-            const txt = await obj.AddComponent(new BS.BanterText({ text: "SUMO PAINT", fontSize: 10, color: new BS.Vector4(1, 1, 1, 1), horizontalAlignment: BS.HorizontalAlignment.Center }));
+            const txt = await obj.AddComponent(new BS.BanterText({ text: "SUMO RINGS", fontSize: 10, color: new BS.Vector4(1, 1, 1, 1), horizontalAlignment: BS.HorizontalAlignment.Center }));
             uiDisplays.push(txt);
         }
     }
@@ -217,7 +217,7 @@
         const timeRemaining = Math.max(0, Math.ceil((gameState.nextDropTime - now) / 1000));
 
         let displayStr = "";
-        if (gameState.status === "LOBBY") displayStr = "SUMO PAINT\nWAITING FOR HOST";
+        if (gameState.status === "LOBBY") displayStr = "SUMO RINGS\nWAITING FOR HOST";
         else if (gameState.status === "ACTIVE") displayStr = `RING DROPS IN: ${timeRemaining}s\nRINGS LEFT: ${gameState.activeRingCount + 1}`;
         else displayStr = "GAME OVER";
 
