@@ -7,9 +7,10 @@
     const RING_STEP = 1.2;
     const MAX_RINGS = 12;
     const DROP_INTERVAL_MS = 10000;
-    const GAME_ARENA_Y = 15;
-    const LOBBY_POS = { x: 0, y: 0.1, z: -40 };
+    const GAME_ARENA_Y = 10;
+    const LOBBY_POS = { x: 0, y: 10.1, z: -40 };
 
+    // Use raw arrays here to avoid ReferenceError: BS is not defined
     const RING_COLOR_DATA = [
         [1, 0.1, 0.1, 1], // Red
         [0.1, 1, 0.1, 1], // Green
@@ -44,6 +45,7 @@
         if (scene) return;
         scene = BS.BanterScene.GetInstance();
 
+        // Convert raw color data to BS.Vector4 now that BS is defined
         ringColors = RING_COLOR_DATA.map(c => new BS.Vector4(c[0], c[1], c[2], c[3]));
 
         console.log("Sumopaint: Calling setupSettings.");
@@ -73,7 +75,7 @@
         const settings = new BS.SceneSettings();
         settings.EnableTeleport = true;
         settings.EnableJump = true;
-        settings.SpawnPoint = new BS.Vector4(LOBBY_POS.x, LOBBY_POS.y, LOBBY_POS.z, 0);
+        settings.SpawnPoint = new BS.Vector4(LOBBY_POS.x, LOBBY_POS.y + 0.05, LOBBY_POS.z, 0);
         scene.SetSettings(settings);
     }
 
@@ -143,17 +145,16 @@
                 localEulerAngles: new BS.Vector3(90, 0, 0) // Face up
             }).Async();
 
-            // Corrected BanterGeometry for RingGeometry
-            // Arguments: type, subdivision, width, height, depth, widthSeg, heightSeg, depthSeg, radius, segments, thetaStart, thetaLength, phiStart, phiLength, radialSeg, openEnded, radiusTop, radiusBottom, innerRadius, outerRadius
+            // Corrected BanterGeometry for RingGeometry with Math.PI * 2 to prevent gaps
             await ringObj.AddComponent(new BS.BanterGeometry(
                 BS.GeometryType.RingGeometry,
                 0, // subdivision
                 1, 1, 1, // width, height, depth (unused)
-                1, 1, 1, // segments (unused)
+                64, 1, 1, // thetaSegments (high for smoothness), heightSeg, depthSeg
                 1, // radius (unused)
-                32, // segments (phi/theta)
-                0, 6.28, // theta start/length
-                0, 6.28, // phi start/length (unused)
+                64, // segments (unused)
+                0, Math.PI * 2, // thetaStart, thetaLength (Full circle)
+                0, Math.PI * 2, // phiStart, phiLength (unused)
                 8, // radial segments
                 false, // open ended
                 1, 1, // radius top/bottom (unused)
