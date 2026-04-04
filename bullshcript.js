@@ -89,7 +89,7 @@
         await floor.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: new BS.Vector4(0.1, 0.1, 0.1, 1) }));
 
         // Buttons
-        const buttonGroup = await new BS.GameObject({ name: "Controls", parent: floor, localPosition: new BS.Vector3(0, 1.2, 5) }).Async();
+        const buttonGroup = await new BS.GameObject({ name: "Controls", parent: floor, localPosition: new BS.Vector3(0, 1.2, 10) }).Async();
 
         const createBtn = async (name, x, color, text, handler) => {
             const btn = await new BS.GameObject({ name: name, parent: buttonGroup, localPosition: new BS.Vector3(x, 0, 0) }).Async();
