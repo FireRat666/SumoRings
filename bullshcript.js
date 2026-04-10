@@ -70,7 +70,7 @@
 
         setupNetworking();
 
-        // Setup player-to-player pushing colliders (Modern SDK approach)
+        // Setup player-to-player pushing colliders (Using Legacy Attachment for compatibility)
         setupPlayerColliders();
 
         setInterval(update, 100);
@@ -79,7 +79,7 @@
 
     // --- Player Pushing Logic ---
     /**
-     * MODERN SDK APPROACH: Player-to-Player Pushing
+     * Pushing Logic:
      *
      * We achieve selective pushing by having every client create local colliders
      * for every REMOTE user.
@@ -113,12 +113,12 @@
         if (userColliders.has(user.uid)) return;
         const colliders = [];
 
-        // Main torso "push" volume
-        colliders.push(await createPushCollider(user, "Body", new BS.Vector3(0.7, 1.4, 0.7), BS.AttachmentType.Chest, new BS.Vector3(0, -0.2, 0), new BS.Vector4(1, 0.5, 0, 0.25)));
+        // Main torso "push" volume - Using Legacy BODY position
+        colliders.push(await createPushCollider(user, "Body", new BS.Vector3(0.7, 1.4, 0.7), BS.LegacyAttachmentPosition.BODY, new BS.Vector3(0, -0.2, 0), new BS.Vector4(1, 0.5, 0, 0.25)));
 
-        // Hand "push" volumes for extra reach and active shoving
-        colliders.push(await createPushCollider(user, "LHand", new BS.Vector3(0.4, 0.4, 0.4), BS.AttachmentType.LeftHand, new BS.Vector3(0, 0, 0), new BS.Vector4(1, 0, 0, 0.4)));
-        colliders.push(await createPushCollider(user, "RHand", new BS.Vector3(0.4, 0.4, 0.4), BS.AttachmentType.RightHand, new BS.Vector3(0, 0, 0), new BS.Vector4(1, 0, 0, 0.4)));
+        // Hand "push" volumes - Using Legacy LEFT/RIGHT_HAND positions
+        colliders.push(await createPushCollider(user, "LHand", new BS.Vector3(0.4, 0.4, 0.4), BS.LegacyAttachmentPosition.LEFT_HAND, new BS.Vector3(0, 0, 0), new BS.Vector4(1, 0, 0, 0.4)));
+        colliders.push(await createPushCollider(user, "RHand", new BS.Vector3(0.4, 0.4, 0.4), BS.LegacyAttachmentPosition.RIGHT_HAND, new BS.Vector3(0, 0, 0), new BS.Vector4(1, 0, 0, 0.4)));
 
         userColliders.set(user.uid, colliders);
     }
@@ -136,8 +136,8 @@
         // Set to Default layer (0) to ensure collision with the local player (layer 23)
         obj.layer = 0;
 
-        // Attach to the remote user's avatar parts
-        user.Attach(obj, attachment);
+        // Attach to the remote user's avatar parts using Legacy system
+        scene.LegacyAttachObject(obj, user.uid, attachment);
 
         return obj;
     }
