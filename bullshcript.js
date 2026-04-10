@@ -34,6 +34,9 @@
     let isMuted = false;
     let audio = { drop: null };
 
+    // Player Pushing Colliders Tracking
+    const userColliders = new Map();
+
     const isHost = () => {
         if (!scene || !scene.localUser || !scene.users) return false;
         const uids = Object.keys(scene.users).sort();
@@ -67,13 +70,90 @@
 
         setupNetworking();
 
+        // Setup player-to-player pushing colliders (Modern SDK approach)
+        setupPlayerColliders();
+
         setInterval(update, 100);
         console.log("SumoRings: Init Complete");
     }
 
+    // --- Player Pushing Logic ---
+    /**
+     * MODERN SDK APPROACH: Player-to-Player Pushing
+     *
+     * We achieve selective pushing by having every client create local colliders
+     * for every REMOTE user.
+     *
+     * 1. On my machine, I attach a collider to YOUR avatar.
+     * 2. This collider only exists for me, so it doesn't mess with my own physics.
+     * 3. When YOUR avatar moves into ME, my local physics engine sees your hand/body
+     *    collider hit my character, and I get pushed.
+     * 4. Because your avatar is position-synced (effectively kinematic), it has
+     *    infinite pushing power against my dynamic player controller.
+     */
+    async function setupPlayerColliders() {
+        scene.On("user-joined", (e) => {
+            const user = e.detail;
+            // We only create colliders for OTHER people.
+            // This achieves the "visible/interactable for others but not self" requirement.
+            if (!user.isLocal) setupUserColliders(user);
+        });
+
+        scene.On("user-left", (e) => {
+            cleanupUserColliders(e.detail.uid);
+        });
+
+        // Setup for anyone already here
+        Object.values(scene.users).forEach(user => {
+            if (!user.isLocal) setupUserColliders(user);
+        });
+    }
+
+    async function setupUserColliders(user) {
+        if (userColliders.has(user.uid)) return;
+        const colliders = [];
+
+        // Main torso "push" volume
+        colliders.push(await createPushCollider(user, "Body", new BS.Vector3(0.7, 1.4, 0.7), BS.AttachmentType.Chest, new BS.Vector3(0, -0.2, 0), new BS.Vector4(1, 0.5, 0, 0.25)));
+
+        // Hand "push" volumes for extra reach and active shoving
+        colliders.push(await createPushCollider(user, "LHand", new BS.Vector3(0.4, 0.4, 0.4), BS.AttachmentType.LeftHand, new BS.Vector3(0, 0, 0), new BS.Vector4(1, 0, 0, 0.4)));
+        colliders.push(await createPushCollider(user, "RHand", new BS.Vector3(0.4, 0.4, 0.4), BS.AttachmentType.RightHand, new BS.Vector3(0, 0, 0), new BS.Vector4(1, 0, 0, 0.4)));
+
+        userColliders.set(user.uid, colliders);
+    }
+
+    async function createPushCollider(user, name, size, attachment, offset, color) {
+        const obj = await new BS.GameObject({ name: `Push_${user.uid}_${name}` }).Async();
+
+        // Visual representation so players can see the "Sumo" zone on others
+        await obj.AddComponent(new BS.BanterBox({ width: size.x, height: size.y, depth: size.z }));
+        await obj.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: color }));
+
+        // Add the physical collider
+        await obj.AddComponent(new BS.BoxCollider({ size: size, center: offset }));
+
+        // Set to Default layer (0) to ensure collision with the local player (layer 23)
+        obj.layer = 0;
+
+        // Attach to the remote user's avatar parts
+        user.Attach(obj, attachment);
+
+        return obj;
+    }
+
+    function cleanupUserColliders(uid) {
+        const colliders = userColliders.get(uid);
+        if (colliders) {
+            colliders.forEach(c => c.Destroy());
+            userColliders.delete(uid);
+        }
+    }
+    // --- End Player Pushing Logic ---
+
     function setupSettings() {
         const settings = new BS.SceneSettings();
-        settings.EnableTeleport = true;
+        settings.EnableTeleport = false;
         settings.EnableJump = true;
         settings.SpawnPoint = new BS.Vector4(LOBBY_POS.x, LOBBY_POS.y + 0.05, LOBBY_POS.z, 0);
         scene.SetSettings(settings);
