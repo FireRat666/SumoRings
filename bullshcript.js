@@ -70,7 +70,7 @@
 
         setupNetworking();
 
-        // Setup player-to-player pushing colliders (Using Legacy Attachment for compatibility)
+        // Setup player-to-player pushing colliders
         setupPlayerColliders();
 
         setInterval(update, 100);
@@ -78,24 +78,9 @@
     }
 
     // --- Player Pushing Logic ---
-    /**
-     * Pushing Logic:
-     *
-     * We achieve selective pushing by having every client create local colliders
-     * for every REMOTE user.
-     *
-     * 1. On my machine, I attach a collider to YOUR avatar.
-     * 2. This collider only exists for me, so it doesn't mess with my own physics.
-     * 3. When YOUR avatar moves into ME, my local physics engine sees your hand/body
-     *    collider hit my character, and I get pushed.
-     * 4. Because your avatar is position-synced (effectively kinematic), it has
-     *    infinite pushing power against my dynamic player controller.
-     */
     async function setupPlayerColliders() {
         scene.On("user-joined", (e) => {
             const user = e.detail;
-            // We only create colliders for OTHER people.
-            // This achieves the "visible/interactable for others but not self" requirement.
             if (!user.isLocal) setupUserColliders(user);
         });
 
@@ -116,7 +101,7 @@
         // Main torso "push" volume - Using Legacy BODY position
         colliders.push(await createPushCollider(user, "Body", new BS.Vector3(0.4, 1.3, 0.4), BS.LegacyAttachmentPosition.BODY, new BS.Vector3(0, -0.2, 0), new BS.Vector4(1, 0.5, 0, 0.25)));
 
-        // Hand "push" volumes - Using Legacy LEFT/RIGHT_HAND positions
+        // Hand pushing volumes - Using Legacy LEFT/RIGHT_HAND positions
         colliders.push(await createPushCollider(user, "LHand", new BS.Vector3(0.3, 0.3, 0.3), BS.LegacyAttachmentPosition.LEFT_HAND, new BS.Vector3(0, 0, 0), new BS.Vector4(1, 0, 0, 0.4)));
         colliders.push(await createPushCollider(user, "RHand", new BS.Vector3(0.3, 0.3, 0.3), BS.LegacyAttachmentPosition.RIGHT_HAND, new BS.Vector3(0, 0, 0), new BS.Vector4(1, 0, 0, 0.4)));
 
@@ -126,12 +111,20 @@
     async function createPushCollider(user, name, size, attachment, offset, color) {
         const obj = await new BS.GameObject({ name: `Push_${user.uid}_${name}` }).Async();
 
-        // Visual representation so players can see the "Sumo" zone on others
+        // Visual representation
         await obj.AddComponent(new BS.BanterBox({ width: size.x, height: size.y, depth: size.z }));
         await obj.AddComponent(new BS.BanterMaterial({ shaderName: "Unlit/DiffuseTransparent", color: color }));
 
-        // Add the physical collider
+        // Physical collider
         await obj.AddComponent(new BS.BoxCollider({ size: size, center: offset }));
+
+        // Add a Kinematic Rigidbody to ensure it pushes others effectively
+        // In Banter, kinematic rigidbodies attached to players exert constant force.
+        await obj.AddComponent(new BS.BanterRigidbody({
+            mass: 50,
+            isKinematic: true,
+            collisionDetectionMode: BS.CollisionDetectionMode.Continuous
+        }));
 
         // Set to Default layer (0) to ensure collision with the local player (layer 23)
         obj.layer = 0;
@@ -156,6 +149,14 @@
         settings.EnableTeleport = false;
         settings.EnableJump = true;
         settings.SpawnPoint = new BS.Vector4(LOBBY_POS.x, LOBBY_POS.y + 0.05, LOBBY_POS.z, 0);
+
+        // --- Physics Tweaks for better Sumo feel ---
+        settings.PhysicsMoveAcceleration = 10;    // Stronger shove when moving
+        settings.PhysicsHandPositionStrength = 5;  // More rigid hand tracking
+        settings.PhysicsHandRotationStrength = 5;
+        settings.PhysicsHandSpringiness = 20;      // Less "mushy" hands
+        settings.PhysicsDrag = 0.1;                // Slight air resistance
+
         scene.SetSettings(settings);
     }
 
@@ -225,20 +226,9 @@
                 localEulerAngles: new BS.Vector3(90, 0, 0) // Face up
             }).Async();
 
-            // Corrected BanterGeometry for RingGeometry with Math.PI * 2 to prevent gaps
             await ringObj.AddComponent(new BS.BanterGeometry(
                 BS.GeometryType.RingGeometry,
-                0, // subdivision
-                1, 1, 1, // width, height, depth (unused)
-                64, 1, 1, // thetaSegments (high for smoothness), heightSeg, depthSeg
-                1, // radius (unused)
-                64, // segments (unused)
-                0, Math.PI * 2, // thetaStart, thetaLength (Full circle)
-                0, Math.PI * 2, // phiStart, phiLength (unused)
-                8, // radial segments
-                false, // open ended
-                1, 1, // radius top/bottom (unused)
-                inner, outer // innerRadius, outerRadius
+                0, 1, 1, 1, 64, 1, 1, 1, 64, 0, Math.PI * 2, 0, Math.PI * 2, 8, false, 1, 1, inner, outer
             ));
 
             await ringObj.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: color, side: BS.MaterialSide.Double }));
