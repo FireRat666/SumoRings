@@ -132,11 +132,16 @@
         }));
 
         // Set to Default layer (0) to ensure collision with the local player (layer 23)
-        obj.layer = 0;
+        // If it's the local user, set to a non-colliding layer for themselves (HandColliders)
+        if (user.isLocal) {
+            obj.layer = 21; // HandColliders layer (doesn't hit self)
+        } else {
+            obj.layer = 0; // Default layer (hits local player)
+        }
 
         // Listen for collisions and apply force to the local player if they hit a remote player's collider
         obj.On("collision-enter", (e) => {
-            if (e.detail.user && e.detail.user.isLocal) {
+            if (e.detail.user && e.detail.user.isLocal && !user.isLocal) {
                 // Apply force to the local player in the direction of the push
                 // We use AddPlayerForce on the scene to affect the local player directly
                 const pushDirection = e.detail.normal.AddNew(new BS.Vector3(0, 0.2, 0)).NormalizeNew();
