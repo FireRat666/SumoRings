@@ -85,7 +85,8 @@
         });
 
         scene.On("user-left", (e) => {
-            cleanupUserColliders(e.detail.uid);
+            const user = e.detail;
+            if (!user.isLocal) cleanupUserColliders(e.detail.uid);
         });
 
         // Setup for anyone already here
@@ -121,8 +122,11 @@
         // Add a Kinematic Rigidbody to ensure it pushes others effectively
         // Working around BS.CollisionDetectionMode being undefined by using raw integer value (1 = Continuous)
         await obj.AddComponent(new BS.BanterRigidbody({
-            mass: 50,
-            isKinematic: true,
+            mass: 5,
+            drag: 0.5,                    // Linear drag (default: 0)
+            angularDrag: 0.5,          // Rotational drag (default: 0.05)
+            useGravity: true,           // Affected by gravity (default: true)
+            isKinematic: false,         // Ignore physics forces (default: false)
             collisionDetectionMode: 1
         }));
 
