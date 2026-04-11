@@ -99,7 +99,7 @@
         const colliders = [];
 
         // Main torso "push" volume - Using Legacy BODY position
-        colliders.push(await createPushCollider(user, "Body", new BS.Vector3(0.4, 1.3, 0.4), BS.LegacyAttachmentPosition.BODY, new BS.Vector3(0, -0.2, 0), new BS.Vector4(1, 0.5, 0, 0.25)));
+        colliders.push(await createPushCollider(user, "Body", new BS.Vector3(0.3, 1.1, 0.3), BS.LegacyAttachmentPosition.BODY, new BS.Vector3(0, -0.2, 0), new BS.Vector4(1, 0.5, 0, 0.25)));
 
         // Hand pushing volumes - Using Legacy LEFT/RIGHT_HAND positions
         colliders.push(await createPushCollider(user, "LHand", new BS.Vector3(0.1, 0.1, 0.1), BS.LegacyAttachmentPosition.LEFT_HAND, new BS.Vector3(0, 0, 0), new BS.Vector4(1, 0, 0, 0.4)));
