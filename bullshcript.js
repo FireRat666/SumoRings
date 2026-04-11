@@ -85,12 +85,12 @@
         });
 
         scene.On("user-left", (e) => {
-            cleanupUserColliders(e.detail.uid);
+//            cleanupUserColliders(e.detail.uid);
         });
 
         // Setup for anyone already here
         Object.values(scene.users).forEach(user => {
-            if (!user.isLocal) setupUserColliders(user);
+            setupUserColliders(user);
         });
     }
 
