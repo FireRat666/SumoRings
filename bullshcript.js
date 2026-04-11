@@ -187,7 +187,7 @@
         settings.PhysicsHandSpringiness = 20;      // Less "mushy" hands
         settings.PhysicsDrag = 0.1;                // Slight air resistance
         settings.EnableHandHold = false;
-//        settings.EnableAvatars = false;
+        settings.EnableAvatars = true;
 
         scene.SetSettings(settings);
     }
