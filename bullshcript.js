@@ -81,12 +81,11 @@
     async function setupPlayerColliders() {
         scene.On("user-joined", (e) => {
             const user = e.detail;
-            if (!user.isLocal) setupUserColliders(user);
+            setupUserColliders(user);
         });
 
         scene.On("user-left", (e) => {
-            const user = e.detail;
-            if (!user.isLocal) cleanupUserColliders(e.detail.uid);
+            cleanupUserColliders(e.detail.uid);
         });
 
         // Setup for anyone already here
