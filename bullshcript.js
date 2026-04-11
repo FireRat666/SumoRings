@@ -85,7 +85,7 @@
         });
 
         scene.On("user-left", (e) => {
-//            cleanupUserColliders(e.detail.uid);
+            // cleanupUserColliders(e.detail.uid);
         });
 
         // Setup for anyone already here
@@ -118,9 +118,11 @@
         // Add the physical collider
         await obj.AddComponent(new BS.BoxCollider({ size: size, center: offset }));
 
-        // Add a Kinematic Rigidbody to ensure it pushes others effectively
-        // Working around BS.CollisionDetectionMode being undefined by using raw integer value (1 = Continuous)
-        await obj.AddComponent(new BS.BanterRigidbody({
+        // Add Collider Events to detect when someone is pushed
+        await obj.AddComponent(new BS.BanterColliderEvents());
+
+        // Add a Rigidbody
+        const rb = await obj.AddComponent(new BS.BanterRigidbody({
             mass: 5,
             drag: 0.5,                    // Linear drag (default: 0)
             angularDrag: 0.5,          // Rotational drag (default: 0.05)
@@ -131,6 +133,17 @@
 
         // Set to Default layer (0) to ensure collision with the local player (layer 23)
         obj.layer = 0;
+
+        // Listen for collisions and apply force to the local player if they hit a remote player's collider
+        obj.On("collision-enter", (e) => {
+            if (e.detail.user && e.detail.user.isLocal) {
+                // Apply force to the local player in the direction of the push
+                // We use AddPlayerForce on the scene to affect the local player directly
+                const pushDirection = e.detail.normal.AddNew(new BS.Vector3(0, 0.2, 0)).NormalizeNew();
+                const pushForce = pushDirection.MultiplyNew(20);
+                scene.AddPlayerForce(pushForce, 1); // 1 = Impulse
+            }
+        });
 
         // Attach to the remote user's avatar parts using Legacy system
         scene.LegacyAttachObject(obj, user.uid, attachment);
@@ -231,20 +244,9 @@
                 localEulerAngles: new BS.Vector3(90, 0, 0) // Face up
             }).Async();
 
-            // Corrected BanterGeometry for RingGeometry with Math.PI * 2 to prevent gaps
             await ringObj.AddComponent(new BS.BanterGeometry(
                 BS.GeometryType.RingGeometry,
-                0, // subdivision
-                1, 1, 1, // width, height, depth (unused)
-                64, 1, 1, // thetaSegments (high for smoothness), heightSeg, depthSeg
-                1, // radius (unused)
-                64, // segments (unused)
-                0, Math.PI * 2, // thetaStart, thetaLength (Full circle)
-                0, Math.PI * 2, // phiStart, phiLength (unused)
-                8, // radial segments
-                false, // open ended
-                1, 1, // radius top/bottom (unused)
-                inner, outer // innerRadius, outerRadius
+                0, 1, 1, 1, 64, 1, 1, 1, 64, 0, Math.PI * 2, 0, Math.PI * 2, 8, false, 1, 1, inner, outer
             ));
 
             await ringObj.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: color, side: BS.MaterialSide.Double }));
