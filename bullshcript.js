@@ -151,7 +151,7 @@
                 // Apply a significant shove to the local player
                 // normal points from the collider towards the hit player
                 const pushDirection = e.detail.normal.AddNew(new BS.Vector3(0, 0.5, 0)).NormalizeNew();
-                const pushForce = pushDirection.MultiplyNew(50); // High force magnitude
+                const pushForce = pushDirection.MultiplyNew(400); // High force magnitude
                 scene.AddPlayerForce(pushForce, 1); // 1 = Impulse
 
                 console.log(`Sumo: Hit by ${user.name}!`);
