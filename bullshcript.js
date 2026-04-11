@@ -151,11 +151,13 @@
         settings.SpawnPoint = new BS.Vector4(LOBBY_POS.x, LOBBY_POS.y + 0.05, LOBBY_POS.z, 0);
 
         // --- Physics Tweaks for better Sumo feel ---
+        settings.PhysicsMoveSpeed = 2;
         settings.PhysicsMoveAcceleration = 10;    // Stronger shove when moving
         settings.PhysicsHandPositionStrength = 5;  // More rigid hand tracking
         settings.PhysicsHandRotationStrength = 5;
         settings.PhysicsHandSpringiness = 20;      // Less "mushy" hands
         settings.PhysicsDrag = 0.1;                // Slight air resistance
+        settings.EnableHandHold = false;
 
         scene.SetSettings(settings);
     }
