@@ -115,15 +115,15 @@
         await obj.AddComponent(new BS.BanterBox({ width: size.x, height: size.y, depth: size.z }));
         await obj.AddComponent(new BS.BanterMaterial({ shaderName: "Unlit/DiffuseTransparent", color: color }));
 
-        // Physical collider
+        // Add the physical collider
         await obj.AddComponent(new BS.BoxCollider({ size: size, center: offset }));
 
         // Add a Kinematic Rigidbody to ensure it pushes others effectively
-        // In Banter, kinematic rigidbodies attached to players exert constant force.
+        // Working around BS.CollisionDetectionMode being undefined by using raw integer value (1 = Continuous)
         await obj.AddComponent(new BS.BanterRigidbody({
             mass: 50,
             isKinematic: true,
-            collisionDetectionMode: BS.CollisionDetectionMode.Continuous
+            collisionDetectionMode: 1
         }));
 
         // Set to Default layer (0) to ensure collision with the local player (layer 23)
@@ -226,9 +226,20 @@
                 localEulerAngles: new BS.Vector3(90, 0, 0) // Face up
             }).Async();
 
+            // Corrected BanterGeometry for RingGeometry with Math.PI * 2 to prevent gaps
             await ringObj.AddComponent(new BS.BanterGeometry(
                 BS.GeometryType.RingGeometry,
-                0, 1, 1, 1, 64, 1, 1, 1, 64, 0, Math.PI * 2, 0, Math.PI * 2, 8, false, 1, 1, inner, outer
+                0, // subdivision
+                1, 1, 1, // width, height, depth (unused)
+                64, 1, 1, // thetaSegments (high for smoothness), heightSeg, depthSeg
+                1, // radius (unused)
+                64, // segments (unused)
+                0, Math.PI * 2, // thetaStart, thetaLength (Full circle)
+                0, Math.PI * 2, // phiStart, phiLength (unused)
+                8, // radial segments
+                false, // open ended
+                1, 1, // radius top/bottom (unused)
+                inner, outer // innerRadius, outerRadius
             ));
 
             await ringObj.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: color, side: BS.MaterialSide.Double }));
