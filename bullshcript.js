@@ -85,7 +85,7 @@
         });
 
         scene.On("user-left", (e) => {
-            // cleanupUserColliders(e.detail.uid);
+            cleanupUserColliders(e.detail.uid);
         });
 
         // Setup for anyone already here
@@ -96,10 +96,20 @@
 
     async function setupUserColliders(user) {
         if (userColliders.has(user.uid)) return;
+
+        // --- Selective Attachment Logic ---
+        // To ensure "colliders don't mess with their normal colliders" and "appears to everyone else except the user",
+        // we skip creating Sumo colliders for the local user on their own client.
+        // Instead, we rely on remote clients creating colliders for the local user.
+        if (user.isLocal) {
+            console.log("Sumo: Skipping local user colliders to prevent self-collision.");
+            return;
+        }
+
         const colliders = [];
 
         // Main torso "push" volume - Using Legacy BODY position
-        colliders.push(await createPushCollider(user, "Body", new BS.Vector3(0.3, 1.1, 0.3), BS.LegacyAttachmentPosition.BODY, new BS.Vector3(0, -0.2, 0), new BS.Vector4(1, 0.5, 0, 0.25)));
+        colliders.push(await createPushCollider(user, "Body", new BS.Vector3(0.25, 0.9, 0.25), BS.LegacyAttachmentPosition.BODY, new BS.Vector3(0, -0.2, 0), new BS.Vector4(1, 0.5, 0, 0.25)));
 
         // Hand pushing volumes - Using Legacy LEFT/RIGHT_HAND positions
         colliders.push(await createPushCollider(user, "LHand", new BS.Vector3(0.1, 0.1, 0.1), BS.LegacyAttachmentPosition.LEFT_HAND, new BS.Vector3(0, 0, 0), new BS.Vector4(1, 0, 0, 0.4)));
@@ -123,7 +133,7 @@
 
         // Add a Rigidbody
         const rb = await obj.AddComponent(new BS.BanterRigidbody({
-            mass: 5,
+            mass: 25,
             drag: 0.5,                    // Linear drag (default: 0)
             angularDrag: 0.5,          // Rotational drag (default: 0.05)
             useGravity: true,           // Affected by gravity (default: true)
@@ -131,22 +141,20 @@
             collisionDetectionMode: 1
         }));
 
-        // Set to Default layer (0) to ensure collision with the local player (layer 23)
-        // If it's the local user, set to a non-colliding layer for themselves (HandColliders)
-        if (user.isLocal) {
-            obj.layer = 21; // HandColliders layer (doesn't hit self)
-        } else {
-            obj.layer = 0; // Default layer (hits local player)
-        }
+        // Set to Default layer (0) to ensure collision with the local player (layer 23/19)
+        obj.layer = 0;
 
-        // Listen for collisions and apply force to the local player if they hit a remote player's collider
+        // Listen for collisions and apply supplemental force to the local player
         obj.On("collision-enter", (e) => {
+            // If the local player is hit by this remote player's collider
             if (e.detail.user && e.detail.user.isLocal && !user.isLocal) {
-                // Apply force to the local player in the direction of the push
-                // We use AddPlayerForce on the scene to affect the local player directly
-                const pushDirection = e.detail.normal.AddNew(new BS.Vector3(0, 0.2, 0)).NormalizeNew();
-                const pushForce = pushDirection.MultiplyNew(20);
+                // Apply a significant shove to the local player
+                // normal points from the collider towards the hit player
+                const pushDirection = e.detail.normal.AddNew(new BS.Vector3(0, 0.5, 0)).NormalizeNew();
+                const pushForce = pushDirection.MultiplyNew(50); // High force magnitude
                 scene.AddPlayerForce(pushForce, 1); // 1 = Impulse
+
+                console.log(`Sumo: Hit by ${user.name}!`);
             }
         });
 
