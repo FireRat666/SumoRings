@@ -1,17 +1,134 @@
 <!DOCTYPE html>
 <html lang="en-AU">
-    <head>
-        <meta charset="UTF-8" />
-        <link id="favicon" rel="icon" href="https://firer.at/files/favicon.ico" type="image/x-icon" />
-        <meta name="color-scheme" content="dark">
-        <meta property="og:title" content="Sumo Rings Game">
-        <meta property="og:description" content="FireR.at's Website/Space for Sumo Rings Game">
-        <meta property="og:image" content="https://cdn.sidequestvr.com/file/1345509/dalle-2024-11-17-124101-a-stylized-fire-rat-fully-made-of-flames-designed-in-a-colored-pencil-art-style-on-textured-paper-the-flames-flow-seamlessly-across-the-rats-form.jpg">
-        <title>FireR.at's Website/Space</title>
-        <link rel="stylesheet" href="https://firer.at/pages/style.css" />
-        <script src="./bullshcript.js?035"></script>
-    </head>
-    <body>
-        <span>Hello, This is a space for Banter, Visit it inside the Banter App!</span>
-    </body>
+  <head>
+    <!-- WEB PAGE HEAD START -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#00ff44">
+    <title>Sumo Rings | Multiplayer Push-Off Game for AltspaceVR &amp; BanterVR | FireR.at</title>
+    <meta name="description" content="Sumo Rings is a multiplayer push-off game room for AltspaceVR (altvr.app) and BanterVR. Everyone wears a bumper ring: shove the others off a shrinking platform and be the last one standing.">
+    <meta name="keywords" content="Sumo Rings, sumo game, bumper game, push off, king of the hill, AltspaceVR game, Banter game, altvr.app, VR party game, FireRat">
+    <meta name="author" content="FireRat">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FireR.at">
+    <meta property="og:title" content="Sumo Rings | Multiplayer Push-Off Game for AltspaceVR &amp; BanterVR">
+    <meta property="og:description" content="Sumo Rings is a multiplayer push-off game room for AltspaceVR (altvr.app) and BanterVR. Everyone wears a bumper ring: shove the others off a shrinking platform and be the last one standing.">
+    <meta property="og:url" content="https://sumo.firer.at/">
+    <meta property="og:image" content="https://cdn.sidequestvr.com/file/1345509/dalle-2024-11-17-124101-a-stylized-fire-rat-fully-made-of-flames-designed-in-a-colored-pencil-art-style-on-textured-paper-the-flames-flow-seamlessly-across-the-rats-form.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Sumo Rings | Multiplayer Push-Off Game for AltspaceVR &amp; BanterVR">
+    <meta name="twitter:description" content="Sumo Rings is a multiplayer push-off game room for AltspaceVR (altvr.app) and BanterVR. Everyone wears a bumper ring: shove the others off a shrinking platform and be the last one standing.">
+    <meta name="twitter:image" content="https://cdn.sidequestvr.com/file/1345509/dalle-2024-11-17-124101-a-stylized-fire-rat-fully-made-of-flames-designed-in-a-colored-pencil-art-style-on-textured-paper-the-flames-flow-seamlessly-across-the-rats-form.jpg">
+    <link rel="canonical" href="https://sumo.firer.at/">
+    <link rel="icon" href="https://firer.at/files/favicon.ico" type="image/x-icon">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "Sumo Rings Game",
+      "url": "https://sumo.firer.at/",
+      "image": "https://cdn.sidequestvr.com/file/1345509/dalle-2024-11-17-124101-a-stylized-fire-rat-fully-made-of-flames-designed-in-a-colored-pencil-art-style-on-textured-paper-the-flames-flow-seamlessly-across-the-rats-form.jpg",
+      "description": "Sumo Rings is a multiplayer push-off game room for AltspaceVR (altvr.app) and BanterVR. Everyone wears a bumper ring: shove the others off a shrinking platform and be the last one standing.",
+      "gamePlatform": [
+        "AltspaceVR",
+        "BanterVR"
+      ],
+      "applicationCategory": "GameApplication",
+      "playMode": "MultiPlayer",
+      "numberOfPlayers": {
+        "@type": "QuantitativeValue",
+        "minValue": 1,
+        "maxValue": 30
+      },
+      "author": {
+        "@type": "Person",
+        "name": "FireRat",
+        "url": "https://firer.at/"
+      },
+      "isPartOf": {
+        "@type": "WebPage",
+        "url": "https://firer.at/games.html"
+      }
+    }
+    </script>
+    <script>
+      // In Altspace or Banter this page is the space itself, so the web page part is hidden.
+      (function () {
+        var hide = function () { document.documentElement.classList.add('in-space'); };
+        if (window.isBanter || window.BS) hide();
+        window.addEventListener('bs-loaded', hide);
+      })();
+    </script>
+    <link rel="stylesheet" href="https://firer.at/pages/nstyle.css">
+    <script src="https://firer.at/scripts/RandomBG.js"></script>
+    <style>
+      .in-space .fire-page, .in-space body::before, .in-space body::after { display: none !important; }
+      .fire-page .info-block ul, .fire-page .info-block ol { color: var(--text-secondary); margin: 0 0 1.25rem 1.4rem; }
+      .fire-page li { margin-bottom: 0.4rem; }
+      .fire-page .info-block { margin-bottom: 3rem; }
+      .fire-page .room-url { font-size: 1.15em; }
+      .fire-page .hero-shot { width: 100%; max-height: 420px; object-fit: cover; border-radius: 16px; margin: 0 0 2rem; display: block; }
+      .fire-page footer { text-align: center; }
+    </style>
+    <!-- WEB PAGE HEAD END -->
+    <!-- The game: in Altspace or Banter this script builds the whole room -->
+    <script src="./bullshcript.js?035"></script>
+  </head>
+  <body>
+<!-- WEB PAGE START: shown in a normal browser, hidden in Altspace and Banter -->
+<div class="fire-page">
+  <div class="ambient-glow-2"></div>
+  <div class="container">
+    <header>
+      <span class="eyebrow">Altspace &amp; Banter game room</span>
+      <h1><span class="text-gradient">Sumo Rings</span></h1>
+      <p><strong>Shove everyone off the ring before it shrinks away.</strong></p>
+      <p>Everyone wears a bumper ring. Run into other players to shove them: the faster you hit, the harder they fly. The platform shrinks as the round goes on. Fall off and you are out, and the last one standing wins.</p>
+    </header>
+
+    <nav>
+      <a href="https://firer.at/games.html" class="buttonG buttonss buttonActive">&larr; All games</a>
+      <a href="https://firer.at/" class="buttonss buttonMain">FireR.at</a>
+      <a href="https://github.com/FireRat666/SumoRings" class="buttonW buttonss" target="_blank">GitHub</a>
+      <a href="https://ko-fi.com/FireRat666" class="buttonGY buttonss" target="_blank">Ko-fi</a>
+    </nav>
+
+    <main>
+      <img class="hero-shot" src="https://cdn.sidequestvr.com/file/1345509/dalle-2024-11-17-124101-a-stylized-fire-rat-fully-made-of-flames-designed-in-a-colored-pencil-art-style-on-textured-paper-the-flames-flow-seamlessly-across-the-rats-form.jpg" alt="Sumo Rings in Altspace" loading="lazy">
+
+      <section class="info-block" id="play">
+        <h2>Play it</h2>
+        <p>Sumo Rings is a whole room, not a game you add to your own world. Open it as a space in VR or on desktop:</p>
+        <ul>
+          <li><strong>Altspace:</strong> type <code class="room-url">sumo.firer.at</code> into the search bar.</li>
+          <li><strong>Banter:</strong> open <code class="room-url">https://sumo.firer.at</code> as a space.</li>
+        </ul>
+        <p>The game runs entirely in the space, so there is no server and nothing to install.</p>
+      </section>
+
+      <section class="info-block" id="how">
+        <h2>How to play</h2>
+        <ol><li>Stand on the <strong>green pad</strong> in the lobby. The game starts when two or more players are on it.</li><li>Run into other players to shove them. The faster you hit, the harder they fly.</li><li>The ring shrinks over time, so there is less and less room.</li><li>Fall off and you are out.</li><li>The last one standing wins.</li></ol>
+      </section>
+
+      <section class="info-block" id="controls">
+        <h2>Controls</h2>
+        <p>The pads and the control panel are in the lobby.</p>
+        <ul><li><strong>Orange pad</strong>: practise alone against the Sumo Bot.</li><li><strong>Sound</strong>: turn the game sounds on or off, just for you.</li><li><strong>Reset game</strong>: end the game and go back to the lobby.</li></ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>Sumo Rings Game by FireRat. Open <a href="https://sumo.firer.at">sumo.firer.at</a> as a space in Altspace or Banter to play.</p>
+      <p>&copy; <span class="fire-year"></span> <a href="https://firer.at/">FireR.at</a></p>
+    </footer>
+  </div>
+  <script>
+    document.querySelectorAll('.fire-year').forEach(el => { el.textContent = new Date().getFullYear(); });
+  </script>
+</div>
+<!-- WEB PAGE END -->
+  </body>
 </html>
