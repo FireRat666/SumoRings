@@ -118,6 +118,7 @@
         const settings = new BS.SceneSettings();
         settings.EnableTeleport = false;
         settings.EnableJump = true;
+        settings.EnableBirdFlight = false;
         settings.EnableHandHold = false;
         settings.MaxOccupancy = 30;
         settings.SpawnPoint = new BS.Vector4(LOBBY.x, LOBBY.y, LOBBY.z, 0);
