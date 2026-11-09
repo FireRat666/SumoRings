@@ -168,7 +168,7 @@
 
     // --- Lobby: floor, ready pad, practice pad, control panel ---
     async function buildLobby() {
-        const floor = await new BS.GameObject({ name: "SumoLobby", localPosition: v3(LOBBY.x, LOBBY.y - 0.3, LOBBY.z) }).Async();
+        const floor = await new BS.GameObject({ name: "SumoLobby", localPosition: v3(LOBBY.x, LOBBY.y - 0.5, LOBBY.z) }).Async();
         await floor.AddComponent(new BS.BanterBox({ width: 24, height: 0.5, depth: 24 }));
         await floor.AddComponent(new BS.BoxCollider({ size: v3(24, 0.5, 24) }));
         await floor.AddComponent(new BS.BanterMaterial({ shaderName: "Standard", color: new BS.Vector4(0.12, 0.12, 0.14, 1) }));
