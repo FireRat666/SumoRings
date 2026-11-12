@@ -370,9 +370,6 @@
             await vis.AddComponent(new BS.BanterGeometry({ geometryType: BS.GeometryType.TorusGeometry, radius: 0.5, tube: 0.07, radialSegments: 10, tubularSegments: 32 }));
             await vis.AddComponent(new BS.BanterMaterial({ shaderName: "Unlit/DiffuseTransparent", color: colorFor(uid) }));
             t.visual = vis;
-            // Other players are solid so you can't walk through them. Only ever added for other
-            // players (never your own), and with no rigidbody, so it can't hit or move yourself.
-            if (uid !== localUid()) await obj.AddComponent(new BS.BoxCollider({ size: v3(0.6, 1.4, 0.6) }));
             await scene.LegacyAttachObject(obj, uid, BS.LegacyAttachmentPosition.BODY);
             await obj.WatchTransform([PN().position], (tf) => { if (tf && tf.position) onTrackerMoved(uid, tf.position); });
             console.log("SumoRings: tracking " + userName(uid) + (uid === localUid() ? " (you)" : ""));
